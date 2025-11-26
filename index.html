@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Glass - SIG Tembakau Temanggung</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="templatemo-neural-style.css" rel="stylesheet">
+    <!-- Include CSS dari export QGIS -->
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/qgis2web.css">
+    
+<!--
+
+TemplateMo 597 Neural Glass
+
+https://templatemo.com/tm-597-neural-glass
+
+-->
+    <style>
+        /* Additional styles for the report section and map */
+        .report {
+            background: rgba(10, 10, 30, 0.5);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+
+        .report h2 {
+            color: #e0a3ff;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .report h3 {
+            color: #ff69b4;
+            margin: 2rem 0 1rem 0;
+            font-size: 1.5rem;
+        }
+
+        .report p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .report ul, .report ol {
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report li {
+            margin-bottom: 0.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table th {
+            background: rgba(224, 163, 255, 0.1);
+            color: #e0a3ff;
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background: rgba(224, 163, 255, 0.05);
+        }
+
+        .map-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .map-toggle {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(90deg, #e0a3ff, #ff69b4);
+            color: #0c0c1d;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(224, 163, 255, 0.3);
+            margin: 1rem 0;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .map-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(224, 163, 255, 0.5);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .map-legend {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+
+        /* Loading indicator for map */
+        .map-loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #e0a3ff;
+            font-size: 1.2rem;
+        }
+
+        .map-loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 2px solid #e0a3ff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Style untuk peta QGIS */
+        #qgis-map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Style untuk popup peta */
+        .leaflet-popup-content table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaflet-popup-content th {
+            background: #e0a3ff;
+            color: #0c0c1d;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .leaflet-popup-content td {
+            padding: 6px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .leaflet-popup-content tr:last-child td {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Epic Neural Background -->
+    <div class="neural-background"></div>
+    
+    <!-- Floating Geometric Shapes -->
+    <div class="geometric-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- Neural Network Lines -->
+    <div class="neural-lines">
+        <div class="neural-line"></div>
+        <div class="neural-line"></div>
+        <div class="neural-line"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass">
+        <nav>
+            <a href="#home" class="logo">
+                <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#e0a3ff"/>
+                            <stop offset="50%" style="stop-color:#ff69b4"/>
+                            <stop offset="100%" style="stop-color:#9370db"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="50" cy="30" r="8" fill="url(#logoGradient)" opacity="0.8">
+                        <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="30" cy="60" r="6" fill="url(#logoGradient)" opacity="0.6">
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="70" cy="65" r="7" fill="url(#logoGradient)" opacity="0.7">
+                        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.8s" repeatCount="indefinite"/>
+                    </circle>
+                    <line x1="50" y1="30" x2="30" y2="60" stroke="url(#logoGradient)" stroke-width="2" opacity="0.6">
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="50" y1="30" x2="70" y2="65" stroke="url(#logoGradient)" stroke-width="2" opacity="0.6">
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="2.2s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="30" y1="60" x2="70" y2="65" stroke="url(#logoGradient)" stroke-width="2" opacity="0.6">
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="2.8s" repeatCount="indefinite"/>
+                    </line>
+                </svg>
+                TEMANGGUNG
+            </a>
+            <ul class="nav-links">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#report">Tentang</a></li>
+                <li><a href="#map-section">Peta</a></li>
+                <li><a href="#contact">Kontak</a></li>
+            </ul>
+            <div class="mobile-menu-toggle">
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+                <div class="hamburger-line"></div>
+            </div>
+        </nav>
+        <div class="mobile-nav">
+            <a href="#home">Beranda</a>
+            <a href="#report">Tentang</a>
+            <a href="#map-section">Peta</a>
+            <a href="#contact">Kontak</a>
+        </div>
+    </header>
+
+    <!-- Section 1: Hero -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-subtitle">Sistem Informasi Geografis</div>
+            <h1>PEMETAAN TEMBAKAU TEMANGGUNG</h1>
+            
+            <div class="hero-description">
+                <p>Analisis spasial produksi tembakau di Kabupaten Temanggung menggunakan teknologi SIG modern untuk mendukung pengambilan keputusan di sektor pertanian.</p>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number">9,685</span>
+                    <span class="hero-stat-label">Produksi 2023 (ton)</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">9,443</span>
+                    <span class="hero-stat-label">Produksi 2024 (ton)</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">20</span>
+                    <span class="hero-stat-label">Kecamatan</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number">100%</span>
+                    <span class="hero-stat-label">Data Akurat</span>
+                </div>
+            </div>
+            
+            <div class="cta-buttons">
+                <a href="#report" class="cta-button">Lihat Laporan</a>
+                <a href="#map-section" class="cta-button secondary">Lihat Peta</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Laporan SIG -->
+    <section class="features" id="report">
+        <div class="features-container">
+            <h2 class="section-title">SIG TEMBAKAU</h2>
+            <div class="report glass">
+                <h2>Pemanfaatan Sistem Informasi Geografis untuk Pemetaan Tanaman Tembakau di Kabupaten Temanggung</h2>
+                
+                <h3>1. Latar Belakang</h3>
+                <p>Kabupaten Temanggung dikenal sebagai salah satu sentra penghasil tembakau terbaik di Indonesia, terutama jenis Tembakau Srintil yang memiliki nilai ekonomi tinggi. Kondisi geografis Temanggung yang berupa wilayah dataran tinggi dengan suhu sejuk dan tanah vulkanik sangat mendukung pertumbuhan tanaman ini.</p>
+                <p>Berdasarkan data Badan Pusat Statistik (BPS) Kabupaten Temanggung, sektor pertanian khususnya tanaman tembakau menjadi penopang utama ekonomi masyarakat di sebagian besar kecamatan. Namun, pengelolaan dan pemantauan data persebaran tanaman tembakau masih dilakukan secara manual. Oleh karena itu, penerapan Sistem Informasi Geografis (SIG) sangat dibutuhkan untuk memetakan potensi, produktivitas, dan distribusi wilayah pertanian tembakau secara spasial dan akurat.</p>
+                
+                <h3>2. Tujuan</h3>
+                <p>Pemilihan tema ini bertujuan untuk:</p>
+                <ol>
+                    <li>Mengidentifikasi sebaran geografis tanaman tembakau di setiap kecamatan di Kabupaten Temanggung.</li>
+                    <li>Memberikan gambaran potensi ekonomi wilayah berdasarkan luas panen dan hasil produksi tembakau.</li>
+                    <li>Menunjukkan bagaimana SIG dapat dimanfaatkan sebagai alat bantu pengambilan kebijakan dan perencanaan pembangunan sektor pertanian.</li>
+                </ol>
+                
+                <h3>3. Data dan Fakta dari BPS</h3>
+                <p>Berdasarkan data resmi dari BPS Kabupaten Temanggung yang tersedia melalui tautan berikut:</p>
+                <p>Data produksi 2023-2024: <a href="https://temanggungkab.bps.go.id/id/statistics-table/2/MjI1IzI=/produksi-perkebunan--ton-.html" target="_blank">BPS Temanggung</a></p>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kecamatan</th>
+                            <th>2023 (ton)</th>
+                            <th>2024 (ton)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Parakan</td><td>543,30</td><td>557,44</td></tr>
+                        <tr><td>2</td><td>Kledung</td><td>994,51</td><td>1310,52</td></tr>
+                        <tr><td>3</td><td>Bansari</td><td>648,10</td><td>650,57</td></tr>
+                        <tr><td>4</td><td>Bulu</td><td>810,00</td><td>1020,41</td></tr>
+                        <tr><td>5</td><td>Temanggung</td><td>50,50</td><td>96,55</td></tr>
+                        <tr><td>6</td><td>Tlogomulyo</td><td>752,28</td><td>822,43</td></tr>
+                        <tr><td>7</td><td>Tembarak</td><td>369,83</td><td>670,67</td></tr>
+                        <tr><td>8</td><td>Selopampang</td><td>303,36</td><td>316,91</td></tr>
+                        <tr><td>9</td><td>Kranggan</td><td>4,70</td><td>5,80</td></tr>
+                        <tr><td>10</td><td>Pringsurat</td><td>6,48</td><td>9,00</td></tr>
+                        <tr><td>11</td><td>Kaloran</td><td>6,70</td><td>32,16</td></tr>
+                        <tr><td>12</td><td>Kandangan</td><td>6,40</td><td>15,81</td></tr>
+                        <tr><td>13</td><td>Kedu</td><td>986,60</td><td>657,27</td></tr>
+                        <tr><td>14</td><td>Ngadirejo</td><td>1227,86</td><td>922,00</td></tr>
+                        <tr><td>15</td><td>Jumo</td><td>786,79</td><td>500,00</td></tr>
+                        <tr><td>16</td><td>Gemawang</td><td>3,00</td><td>5,70</td></tr>
+                        <tr><td>17</td><td>Candiroto</td><td>585,50</td><td>420,00</td></tr>
+                        <tr><td>18</td><td>Bejen</td><td>-</td><td>-</td></tr>
+                        <tr><td>19</td><td>Tretep</td><td>861,95</td><td>800,65</td></tr>
+                        <tr><td>20</td><td>Wonoboyo</td><td>737,88</td><td>629,13</td></tr>
+                        <tr><td><strong>Total</strong></td><td><strong>Kabupaten Temanggung</strong></td><td><strong>9685,73</strong></td><td><strong>9443,18</strong></td></tr>
+                    </tbody>
+                </table>
+                
+                <p>Dari tabel tersebut dapat diketahui bahwa tembakau merupakan komoditas unggulan di Kabupaten Temanggung, dengan produksi tersebar di berbagai kecamatan seperti Kledung, Bansari, dan Parakan yang memiliki kontribusi terbesar terhadap total produksi daerah.</p>
+                <p>Produksi tembakau di wilayah-wilayah tersebut menunjukkan bahwa kondisi geografis pegunungan dan iklim sejuk sangat mendukung budidaya tembakau.</p>
+                <p>Data ini juga menggambarkan bahwa potensi pertanian tembakau di Temanggung tidak merata, dengan dominan di wilayah utara yang memiliki curah hujan sedang dan ketinggian optimal untuk pertumbuhan tanaman tembakau berkualitas tinggi.</p>
+                
+                <h3>4. Manfaat SIG dalam Pemetaan Pertanian</h3>
+                <p>Pemanfaatan SIG terhadap data pertanian dari BPS Temanggung memberikan sejumlah manfaat strategis, antara lain:</p>
+                <ul>
+                    <li><strong>Pemetaan sebaran produksi:</strong> SIG memungkinkan visualisasi spasial lokasi kecamatan penghasil utama tembakau, lengkap dengan atribut produksi dan luas panen.</li>
+                    <li><strong>Perencanaan zonasi pertanian:</strong> Informasi peta dapat digunakan untuk menentukan wilayah pengembangan tembakau unggulan, konservasi lahan, dan diversifikasi tanaman.</li>
+                    <li><strong>Pengawasan dan evaluasi:</strong> Dengan data spasial, pemerintah daerah dapat memantau perubahan penggunaan lahan serta dampak lingkungan akibat intensifikasi tembakau.</li>
+                    <li><strong>Pendukung ekonomi lokal:</strong> Data hasil pemetaan bisa membantu pengrajin, pabrikan rokok, dan koperasi tani menentukan sumber bahan baku secara efisien.</li>
+                </ul>
+                
+                <h3>5. Kesimpulan</h3>
+                <p>Pemanfaatan Sistem Informasi Geografis (SIG) untuk pemetaan tanaman tembakau di Kabupaten Temanggung memberikan solusi berbasis data spasial dalam mengelola potensi pertanian daerah. Dengan mengacu pada data resmi BPS Kabupaten Temanggung, SIG dapat menjadi alat strategis untuk mendukung pengambilan keputusan di bidang ekonomi, tata ruang, dan lingkungan, sekaligus memperkuat citra Temanggung sebagai daerah penghasil tembakau unggulan di Indonesia.</p>
+                
+                <p><strong>Nama:</strong> Iwan Aurelio Esyifa<br>
+                <strong>NPM:</strong> 23670131</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Peta Interaktif -->
+    <section class="showcase" id="map-section">
+        <h2 class="section-title">PETA INTERAKTIF</h2>
+        <div class="report glass">
+            <h3>Peta Produksi Tembakau Kabupaten Temanggung</h3>
+            <p>Peta berikut menunjukkan distribusi produksi tembakau di berbagai kecamatan di Kabupaten Temanggung berdasarkan data BPS tahun 2023.</p>
+            
+            <button id="mapToggle" class="map-toggle">Tampilkan Peta QGIS</button>
+            
+            <div id="mapContainer" class="map-container hidden">
+                <div id="qgis-map">
+                    <div class="map-loading">Memuat peta QGIS...</div>
+                </div>
+            </div>
+            
+            <div class="map-legend">
+                <h4>Legenda Produksi Tembakau (ton)</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: rgba(237,248,251,1.0);"></div>
+                    <span>0 - 50 ton</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: rgba(178,226,226,1.0);"></div>
+                    <span>50 - 369 ton</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: rgba(102,194,164,1.0);"></div>
+                    <span>369 - 648 ton</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: rgba(44,162,95,1.0);"></div>
+                    <span>648 - 861 ton</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: rgba(0,109,44,1.0);"></div>
+                    <span>861 - 1227 ton</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Contact -->
+    <section class="contact" id="contact">
+        <div class="contact-container">
+            <div class="contact-info glass">
+                <h3>HUBUNGI KAMI</h3>
+                <p>Untuk informasi lebih lanjut tentang penelitian ini atau kolaborasi dalam pengembangan Sistem Informasi Geografis untuk pertanian, silakan hubungi kami.</p>
+                <p>Kami terbuka untuk diskusi dan kerja sama dalam pengembangan teknologi SIG untuk mendukung sektor pertanian di Indonesia.</p>
+                
+                <div class="social-links">
+                    <a href="#" class="glass">📧</a>
+                    <a href="#" class="glass">📱</a>
+                    <a href="#" class="glass">💼</a>
+                    <a href="#" class="glass">🌐</a>
+                </div>
+            </div>
+            
+            <div class="contact-form glass">
+                <div class="form-group">
+                    <input type="text" placeholder="Nama Lengkap" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" placeholder="Alamat Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" placeholder="Subjek Pesan" required>
+                </div>
+                <div class="form-group">
+                    <textarea rows="5" placeholder="Isi Pesan" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">KIRIM PESAN</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#home">Home</a>
+                <a href="#report">Laporan SIG</a>
+                <a href="#map-section">Peta Interaktif</a>
+                <a href="#contact">Kontak</a>
+                <a href="https://temanggungkab.bps.go.id" target="_blank" rel="noopener">BPS Temanggung</a>
+                <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2025 SIG Tembakau Temanggung. Hak cipta dilindungi undang-undang.</p>
+            </div>
+            <div class="footer-design">
+                Design: <a href="https://templatemo.com" target="_blank" rel="nofollow noopener">TemplateMo</a> | 
+                Enhanced by Neural AI Systems | 
+                <a href="#">SIG Framework</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script dari export QGIS -->
+    <script src="js/qgis2web_expressions.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/multi-style-layer.js"></script>
+    <script src="js/leaflet.rotatedMarker.js"></script>
+    <script src="js/leaflet.pattern.js"></script>
+    <script src="js/leaflet-hash.js"></script>
+    <script src="js/Autolinker.min.js"></script>
+    <script src="js/rbush.min.js"></script>
+    <script src="js/labelgun.min.js"></script>
+    <script src="js/labels.js"></script>
+    <script src="data/LapakGIS_Batas_Kecamatan_2024_0.js"></script>
+
+    <!-- Script template Neural Glass (jangan dihapus) -->
+    <script src="templatemo-neural-scripts.js"></script>
+
+    <!-- Script untuk mengintegrasikan peta QGIS PERSIS seperti export -->
+    <script>
+        let mapReady = false;
+        let map = null;
+
+        document.getElementById('mapToggle').addEventListener('click', function() {
+            const container = document.getElementById('mapContainer');
+            const btn = this;
+
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                btn.textContent = 'Sembunyikan Peta';
+                if (!mapReady) initQgisMap(); // hanya jalankan sekali
+            } else {
+                container.classList.add('hidden');
+                btn.textContent = 'Tampilkan Peta QGIS';
+            }
+        });
+
+        function initQgisMap() {
+            mapReady = true;
+            document.querySelector('.map-loading')?.remove();
+            
+            // INISIALISASI PETA PERSIS SEPERTI EXPORT QGIS
+            var map = L.map('qgis-map', {
+                zoomControl:true, 
+                maxZoom:28, 
+                minZoom:1
+            }).fitBounds([[-7.43414632329,109.855814544],[-7.09135510879,110.503170559]]);
+            
+            var hash = new L.Hash(map);
+            map.attributionControl.addAttribution('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a>');
+            
+            var bounds_group = new L.featureGroup([]);
+            
+            function setBounds() {
+                // Fungsi untuk mengatur bounds
+            }
+
+            // FUNGSI POPUP PERSIS SEPERTI EXPORT
+            function pop_LapakGIS_Batas_Kecamatan_2024_0(feature, layer) {
+                var popupContent = '<table>\
+                        <tr>\
+                            <td colspan="2">' + (feature.properties['WADMKC'] !== null ? Autolinker.link(String(feature.properties['WADMKC'])) : '') + '</td>\
+                        </tr>\
+                        <tr>\
+                            <td colspan="2">' + (feature.properties['2023'] !== null ? Autolinker.link(String(feature.properties['2023'])) : '') + '</td>\
+                        </tr>\
+                        <tr>\
+                            <td colspan="2">' + (feature.properties['2024'] !== null ? Autolinker.link(String(feature.properties['2024'])) : '') + '</td>\
+                        </tr>\
+                        <tr>\
+                            <td colspan="2">' + (feature.properties['produksi'] !== null ? Autolinker.link(String(feature.properties['produksi'])) : '') + '</td>\
+                        </tr>\
+                    </table>';
+                layer.bindPopup(popupContent, {maxHeight: 400});
+            }
+
+            // FUNGSI STYLING PERSIS SEPERTI EXPORT (3 fungsi terpisah)
+            function style_LapakGIS_Batas_Kecamatan_2024_0_0(feature) {
+                if (feature.properties['2023'] >= 0.000000 && feature.properties['2023'] <= 50.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(237,248,251,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 50.000000 && feature.properties['2023'] <= 369.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(178,226,226,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 369.000000 && feature.properties['2023'] <= 648.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(102,194,164,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 648.000000 && feature.properties['2023'] <= 861.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(44,162,95,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 861.000000 && feature.properties['2023'] <= 1227.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(0,109,44,1.0)',
+                }
+                }
+            }
+            
+            function style_LapakGIS_Batas_Kecamatan_2024_0_1(feature) {
+                if (feature.properties['2023'] >= 0.000000 && feature.properties['2023'] <= 50.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(237,248,251,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 50.000000 && feature.properties['2023'] <= 369.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(178,226,226,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 369.000000 && feature.properties['2023'] <= 648.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(102,194,164,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 648.000000 && feature.properties['2023'] <= 861.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(44,162,95,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 861.000000 && feature.properties['2023'] <= 1227.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(0,109,44,1.0)',
+                }
+                }
+            }
+            
+            function style_LapakGIS_Batas_Kecamatan_2024_0_2(feature) {
+                if (feature.properties['2023'] >= 0.000000 && feature.properties['2023'] <= 50.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(237,248,251,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 50.000000 && feature.properties['2023'] <= 369.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(178,226,226,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 369.000000 && feature.properties['2023'] <= 648.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(102,194,164,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 648.000000 && feature.properties['2023'] <= 861.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(44,162,95,1.0)',
+                }
+                }
+                if (feature.properties['2023'] >= 861.000000 && feature.properties['2023'] <= 1227.000000 ) {
+                    return {
+                    pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                    opacity: 1,
+                    color: 'rgba(0,0,0,1.0)',
+                    dashArray: '',
+                    lineCap: 'butt',
+                    lineJoin: 'miter',
+                    weight: 1.0, 
+                    fill: true,
+                    fillOpacity: 1,
+                    fillColor: 'rgba(0,109,44,1.0)',
+                }
+                }
+            }
+
+            // BUAT PANE PERSIS SEPERTI EXPORT
+            map.createPane('pane_LapakGIS_Batas_Kecamatan_2024_0');
+            map.getPane('pane_LapakGIS_Batas_Kecamatan_2024_0').style.zIndex = 400;
+            map.getPane('pane_LapakGIS_Batas_Kecamatan_2024_0').style['mix-blend-mode'] = 'normal';
+
+            // TAMBAHKAN LAYER DENGAN MULTI-STYLE PERSIS SEPERTI EXPORT
+            var layer_LapakGIS_Batas_Kecamatan_2024_0 = new L.geoJson.multiStyle(json_LapakGIS_Batas_Kecamatan_2024_0, {
+                attribution: '<a href=""></a>',
+                pane: 'pane_LapakGIS_Batas_Kecamatan_2024_0',
+                onEachFeature: pop_LapakGIS_Batas_Kecamatan_2024_0,
+                styles: [style_LapakGIS_Batas_Kecamatan_2024_0_0,style_LapakGIS_Batas_Kecamatan_2024_0_1,style_LapakGIS_Batas_Kecamatan_2024_0_2,]
+            });
+
+            bounds_group.addLayer(layer_LapakGIS_Batas_Kecamatan_2024_0);
+            map.addLayer(layer_LapakGIS_Batas_Kecamatan_2024_0);
+            setBounds();
+
+            // LABEL DAN TOOLTIP PERSIS SEPERTI EXPORT
+            var i = 0;
+            var labels = [];
+            var totalMarkers = 0;
+
+            layer_LapakGIS_Batas_Kecamatan_2024_0.eachLayer(function(layer) {
+                var context = {
+                    feature: layer.feature,
+                    variables: {}
+                };
+                layer.bindTooltip((layer.feature.properties['WADMKC'] !== null?String('<div style="color: #000000; font-size: 8pt; font-family: \'Modern\', sans-serif;">' + layer.feature.properties['WADMKC']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_LapakGIS_Batas_Kecamatan_2024_0'});
+                labels.push(layer);
+                totalMarkers += 1;
+                  layer.added = true;
+                  addLabel(layer, i);
+                  i++;
+            });
+
+            // FUNGSI RESET LABELS PERSIS SEPERTI EXPORT
+            resetLabels([layer_LapakGIS_Batas_Kecamatan_2024_0]);
+            
+            map.on("zoomend", function(){
+                resetLabels([layer_LapakGIS_Batas_Kecamatan_2024_0]);
+            });
+            
+            map.on("layeradd", function(){
+                resetLabels([layer_LapakGIS_Batas_Kecamatan_2024_0]);
+            });
+            
+            map.on("layerremove", function(){
+                resetLabels([layer_LapakGIS_Batas_Kecamatan_2024_0]);
+            });
+        }
+    </script>
+</body>
+</html>
